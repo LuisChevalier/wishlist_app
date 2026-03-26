@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../viewmodels/auth_viewmodel.dart';
 import '../../core/logger_service.dart';
+import '../../core/sound_service.dart';
 
 /// [LoginScreen] proporciona una interfaz inmersiva y moderna para iniciar sesión.
 /// Ahora soporta autenticación mediante contraseña (creación automática en primer uso).
@@ -20,6 +21,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isObscured = true;
 
   @override
+  void initState() {
+    super.initState();
+    soundService.startBackgroundMusic();
+  }
+
+  @override
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
@@ -33,8 +40,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       
       try {
         await ref.read(authViewModelProvider.notifier).login(username, password);
+        soundService.playConfirmSound();
       } catch (e) {
         if (!mounted) return;
+        soundService.playErrorSound();
         // Limpiamos el texto 'Exception: ' para mostrar algo amigable al usuario
         final errorMsg = e.toString().replaceAll('Exception: ', '');
         LoggerService.e('LoginScreen - Falló la autenticación: $errorMsg');
@@ -87,16 +96,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Ícono principal animado
-                  Icon(
-                    Icons.favorite_rounded,
-                    size: 80,
-                    color: colorScheme.primary,
-                  ).animate()
-                      .scale(duration: 600.ms, curve: Curves.easeOutBack)
-                      .fadeIn()
-                      .then()
-                      .shimmer(duration: 1200.ms),
+                  // Ícono principal animado con efecto de respiración
+                  Semantics(
+                    label: 'Logotipo de DreamList, un corazón',
+                    child: Icon(
+                      Icons.favorite_rounded,
+                      size: 80,
+                      color: colorScheme.primary,
+                    ),
+                  ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+                      .scale(duration: 1000.ms, begin: const Offset(1, 1), end: const Offset(1.1, 1.1), curve: Curves.easeInOut)
+                      .fadeIn(duration: 600.ms)
+                      .shimmer(delay: 2000.ms, duration: 1500.ms),
                   const SizedBox(height: 24),
                   
                   // Títulos
@@ -108,7 +119,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       color: colorScheme.primary,
                       letterSpacing: -1,
                     ),
-                  ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2),
+                  ).animate().fadeIn(delay: 200.ms, duration: 800.ms).slideY(begin: 0.3, curve: Curves.easeOutBack),
                   const SizedBox(height: 8),
                   Text(
                     'Inicia sesión o regístrate',
@@ -116,7 +127,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
-                  ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2),
+                  ).animate().fadeIn(delay: 400.ms, duration: 800.ms).slideY(begin: 0.3, curve: Curves.easeOutBack),
                   const SizedBox(height: 48),
 
                   // Caja de entrada - Usuario

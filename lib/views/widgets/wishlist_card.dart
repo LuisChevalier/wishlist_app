@@ -66,121 +66,133 @@ class WishlistCard extends StatelessWidget {
               ),
             ],
           ),
-          child: Card(
-            margin: EdgeInsets.zero,
-            color: item.isPurchased 
-               ? theme.colorScheme.surfaceVariant.withOpacity(0.5) 
-               : theme.colorScheme.surface,
-            elevation: 0, // La sombra se maneja en el Container padre para mayor control
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-              side: BorderSide(
-                color: item.isPurchased 
-                  ? Colors.transparent 
-                  : theme.colorScheme.outlineVariant.withOpacity(0.5),
+          child: Semantics(
+            label: '${item.name}, ${currencyFormatter.format(item.price)}. ${item.isPurchased ? "Comprado" : "Pendiente"}. Prioridad ${item.priority.label}',
+            selected: item.isPurchased,
+            button: true,
+            onTap: onTap,
+            child: Card(
+              margin: EdgeInsets.zero,
+              color: item.isPurchased 
+                 ? theme.colorScheme.surfaceVariant.withOpacity(0.5) 
+                 : theme.colorScheme.surface,
+              elevation: 0, // La sombra se maneja en el Container padre para mayor control
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+                side: BorderSide(
+                  color: item.isPurchased 
+                    ? Colors.transparent 
+                    : theme.colorScheme.outlineVariant.withOpacity(0.5),
+                ),
               ),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: onTap,
-              // Tinta al presionar
-              splashColor: priorityColor.withOpacity(0.1),
-              highlightColor: priorityColor.withOpacity(0.05),
-              child: IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Banda lateral del color de prioridad
-                    Container(
-                      width: 8,
-                      decoration: BoxDecoration(
-                        color: item.isPurchased ? Colors.grey.shade400 : priorityColor,
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: onTap,
+                // Tinta al presionar
+                splashColor: priorityColor.withOpacity(0.1),
+                highlightColor: priorityColor.withOpacity(0.05),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Banda lateral del color de prioridad
+                      Container(
+                        width: 8,
+                        decoration: BoxDecoration(
+                          color: item.isPurchased ? Colors.grey.shade400 : priorityColor,
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    item.name,
-                                    style: titleStyle,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  currencyFormatter.format(item.price),
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w900,
-                                    color: item.isPurchased ? Colors.grey : theme.colorScheme.primary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                // Badge de prioridad animado
-                                PriorityBadge(priority: item.priority)
-                                  .animate(target: item.isPurchased ? 1 : 0)
-                                  .desaturate(end: 1),
-                                const Spacer(),
-                                // Etiqueta de tienda si existe
-                                if (item.purchaseLocation.isNotEmpty) ...[
-                                  Icon(Icons.location_on_outlined, size: 16, color: Colors.grey.shade500),
-                                  const SizedBox(width: 4),
-                                  Flexible(
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
                                     child: Text(
-                                      item.purchaseLocation,
-                                      style: TextStyle(
-                                        fontSize: 13, 
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.grey.shade500
-                                      ),
+                                      item.name,
+                                      style: titleStyle,
+                                      maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                ]
-                              ],
-                            ),
-                          ],
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    currencyFormatter.format(item.price),
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w900,
+                                      color: item.isPurchased ? Colors.grey : theme.colorScheme.primary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  // Badge de prioridad animado
+                                  ExcludeSemantics(
+                                    child: PriorityBadge(priority: item.priority)
+                                      .animate(target: item.isPurchased ? 1 : 0)
+                                      .desaturate(end: 1),
+                                  ),
+                                  const Spacer(),
+                                  // Etiqueta de tienda si existe
+                                  if (item.purchaseLocation.isNotEmpty) ...[
+                                    Icon(Icons.location_on_outlined, size: 16, color: Colors.grey.shade500),
+                                    const SizedBox(width: 4),
+                                    Flexible(
+                                      child: Text(
+                                        item.purchaseLocation,
+                                        style: TextStyle(
+                                          fontSize: 13, 
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.grey.shade500
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ]
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    // Checkbox customizado y ampliado para mejor zona táctil
-                    Padding(
-                      padding: const EdgeInsets.only(right: 12.0),
-                      child: Center(
-                        child: Transform.scale(
-                          scale: 1.3,
-                          child: Checkbox(
-                            value: item.isPurchased,
-                            onChanged: onPurchasedToggled,
-                            activeColor: theme.colorScheme.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            side: BorderSide(
-                              color: theme.colorScheme.outline.withOpacity(0.5),
-                              width: 1.5,
+                      // Checkbox customizado y ampliado para mejor zona táctil
+                      Padding(
+                        padding: const EdgeInsets.only(right: 12.0),
+                        child: Center(
+                          child: Transform.scale(
+                            scale: 1.3,
+                            child: Semantics(
+                              label: 'Marcar como comprado',
+                              toggled: item.isPurchased,
+                              child: Checkbox(
+                                value: item.isPurchased,
+                                onChanged: onPurchasedToggled,
+                                activeColor: theme.colorScheme.primary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                side: BorderSide(
+                                  color: theme.colorScheme.outline.withOpacity(0.5),
+                                  width: 1.5,
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, duration: 400.ms, curve: Curves.easeOutQuad),
+        ).animate().scale(delay: 50.ms, begin: const Offset(0.98, 0.98), duration: 300.ms, curve: Curves.easeOutQuad).fadeIn(duration: 300.ms),
       ),
     );
   }

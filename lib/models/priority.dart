@@ -19,7 +19,7 @@ extension PriorityExtension on Priority {
       case Priority.necessity:
         return 'Necesidad';
       case Priority.niceToHave:
-        return 'Gusto imprescindible';
+        return 'Imprescindible';
       case Priority.nonRelevant:
         return 'No relevante';
     }

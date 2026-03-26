@@ -12,6 +12,8 @@ import 'viewmodels/auth_viewmodel.dart';
 import 'views/screens/home_screen.dart';
 import 'views/screens/login_screen.dart';
 
+import 'core/sound_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -26,6 +28,9 @@ void main() async {
   final dbService = HiveWishlistService();
 
   await initializeDateFormatting('es', null);
+
+  // Iniciar el servicio de sonido de forma global al arrancar
+  soundService.startBackgroundMusic();
 
   runApp(
     ProviderScope(

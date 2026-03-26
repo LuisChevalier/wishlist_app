@@ -12,11 +12,26 @@ import 'add_edit_screen.dart';
 /// [HomeScreen] es la pantalla principal o Dashboard del usuario.
 /// Proporciona el listado principal de deseos, métricas estadísticas,
 /// y opciones de filtrado, ordenado y logout.
-class HomeScreen extends ConsumerWidget {
+import '../../core/sound_service.dart';
+
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Asegurar que la música sigue sonando al entrar en el Dashboard
+    soundService.startBackgroundMusic();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ref = this.ref;
     // Escucha el estado completo (lista, stats, etc.) de la wishlist
     final state = ref.watch(wishlistViewModelProvider);
     // Controladores de acciones (sin escuchar cambios constantes para evitar rebuilds)
@@ -102,11 +117,11 @@ class HomeScreen extends ConsumerWidget {
                       necessityCount: state.necessityCount,
                       niceToHaveCount: state.niceToHaveCount,
                       nonRelevantCount: state.nonRelevantCount,
-                    ).animate().fadeIn(duration: 500.ms).slideY(begin: -0.1),
+                    ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack).fadeIn().shimmer(delay: 1.seconds, duration: 2.seconds),
                   ),
                 ),
                 
-                // Listado Principal
+                // Listado Principal con efectos escalonados
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   sliver: SliverList(
@@ -118,7 +133,9 @@ class HomeScreen extends ConsumerWidget {
                           onPurchasedToggled: (_) => notifier.togglePurchased(item.id),
                           onDismissed: () => notifier.deleteItem(item.id),
                           onTap: () => _navigateToEdit(context, item.id),
-                        );
+                        ).animate(delay: (index * 100).ms)
+                          .fadeIn(duration: 400.ms)
+                          .slideY(begin: 0.1, curve: Curves.easeOutQuad);
                       },
                       childCount: state.filteredItems.length,
                     ),

@@ -5,6 +5,7 @@ import '../../models/wishlist_item.dart';
 import '../../models/priority.dart';
 import '../../viewmodels/wishlist_viewmodel.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../core/sound_service.dart';
 
 /// [AddEditScreen] provee un formulario pulido e intuitivo para 
 /// la creación o modificación de un ítem de la lista de deseos.
@@ -114,6 +115,7 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
         );
         ref.read(wishlistViewModelProvider.notifier).addItem(newItem);
       }
+      soundService.playConfirmSound();
       Navigator.of(context).pop();
     }
   }
@@ -166,23 +168,25 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                         style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
                         decoration: _buildInputDecoration('Producto / Deseo', Icons.star_border, colorScheme),
                         validator: (val) => val == null || val.isEmpty ? 'Requerido' : null,
-                      ).animate().fadeIn(delay: 100.ms).slideX(),
+                      ),
                       
                       const SizedBox(height: 24),
                       
                       // Prioridad
                       DropdownButtonFormField<Priority>(
-                        initialValue: _priority,
+                        value: _priority, // Usar value en lugar de initialValue para mayor estabilidad
+                        isExpanded: true, // Evita desbordamientos horizontales/verticales en el botón
                         decoration: _buildInputDecoration('Prioridad', Icons.low_priority, colorScheme),
                         icon: const Icon(Icons.expand_more_rounded),
                         items: Priority.values.map((p) {
                           return DropdownMenuItem(
                             value: p,
                             child: Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(p.icon, color: p.color, size: 20),
+                                Icon(p.icon, color: p.color, size: 18),
                                 const SizedBox(width: 12),
-                                Text(p.label, style: TextStyle(color: p.color, fontWeight: FontWeight.w600)),
+                                Text(p.label, style: TextStyle(color: p.color, fontSize: 14, fontWeight: FontWeight.w600)),
                               ],
                             ),
                           );
@@ -190,7 +194,7 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                         onChanged: (val) {
                           if (val != null) setState(() => _priority = val);
                         },
-                      ).animate().fadeIn(delay: 200.ms).slideX(),
+                      ),
                       
                       const SizedBox(height: 24),
                       
@@ -201,11 +205,11 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                         decoration: _buildInputDecoration('Precio estimado', Icons.euro_symbol_rounded, colorScheme),
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         validator: (val) => val == null || double.tryParse(val) == null ? 'Número válido requerido' : null,
-                      ).animate().fadeIn(delay: 300.ms).slideX(),
+                      ),
                     ],
                   ),
                 ),
-              ),
+              ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.1, curve: Curves.easeOutQuad),
 
               const SizedBox(height: 16),
               
@@ -224,7 +228,7 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                       TextFormField(
                         controller: _locationController,
                         decoration: _buildInputDecoration('Tienda o URL', Icons.storefront_rounded, colorScheme),
-                      ).animate().fadeIn(delay: 400.ms).slideX(),
+                      ),
                       
                       const SizedBox(height: 24),
                       
@@ -242,7 +246,7 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                             ],
                           ),
                         ),
-                      ).animate().fadeIn(delay: 500.ms).slideX(),
+                      ),
                       
                       const SizedBox(height: 24),
                       
@@ -251,11 +255,11 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                         controller: _notesController,
                         decoration: _buildInputDecoration('Notas o justificación', Icons.notes_rounded, colorScheme),
                         maxLines: 3,
-                      ).animate().fadeIn(delay: 600.ms).slideX(),
+                      ),
                     ],
                   ),
                 ),
-              ),
+              ).animate(delay: 200.ms).fadeIn(duration: 600.ms).slideY(begin: 0.2, curve: Curves.easeOutQuad),
 
               const SizedBox(height: 32),
               

@@ -19,44 +19,54 @@ class StatsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '$totalItems deseos',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.bold,
-                    ),
+    return Semantics(
+      label: 'Resumen de wishlist: $totalItems deseos en total. Coste estimado de ${estimatedCost.toStringAsFixed(0)} euros. $necessityCount necesidades, $niceToHaveCount caprichos y $nonRelevantCount no relevantes.',
+      container: true,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ExcludeSemantics(
+                  child: Text(
+                    '$totalItems deseos',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
+                ExcludeSemantics(
+                  child: Text(
+                    '€${estimatedCost.toStringAsFixed(0)}',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ExcludeSemantics(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildStatBadge(context, '$necessityCount', Priority.necessity.color, Priority.necessity.icon),
+                  _buildStatBadge(context, '$niceToHaveCount', Priority.niceToHave.color, Priority.niceToHave.icon),
+                  _buildStatBadge(context, '$nonRelevantCount', Priority.nonRelevant.color, Priority.nonRelevant.icon),
+                ],
               ),
-              Text(
-                '€${estimatedCost.toStringAsFixed(0)}',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildStatBadge(context, '$necessityCount', Priority.necessity.color, Priority.necessity.icon),
-              _buildStatBadge(context, '$niceToHaveCount', Priority.niceToHave.color, Priority.niceToHave.icon),
-              _buildStatBadge(context, '$nonRelevantCount', Priority.nonRelevant.color, Priority.nonRelevant.icon),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
