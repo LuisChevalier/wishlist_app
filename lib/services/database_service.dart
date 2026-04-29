@@ -1,6 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/wishlist_item.dart';
-import '../models/priority.dart';
 import '../core/logger_service.dart';
 
 /// Protocolo (Interfaz) para el servicio de base de datos de la Wishlist.
@@ -37,28 +36,8 @@ class HiveWishlistService implements DatabaseService {
       LoggerService.i('Caja de Hive principal abierta: $boxName');
     }
 
-    if (_box.isEmpty) {
-      LoggerService.i('La caja de $userId está vacía. Añadiendo datos de demostración.');
-      // Add demo data on first launch
-      final demo1 = WishlistItem(
-        name: 'MacBook Pro',
-        priority: Priority.necessity,
-        price: 1999.0,
-        purchaseLocation: 'Apple Store',
-        expectedDate: DateTime.now().add(const Duration(days: 30)),
-        notes: 'Chip M3 Pro, 18GB RAM - Fundamental para trabajo',
-      );
-      final demo2 = WishlistItem(
-        name: 'Sony WH-1000XM5',
-        priority: Priority.niceToHave,
-        price: 279.0,
-        purchaseLocation: 'Amazon',
-        expectedDate: DateTime.now().add(const Duration(days: 60)),
-        notes: 'Cancelación de ruido espectacular para la oficina',
-      );
-      await _box.put(demo1.id, demo1);
-      await _box.put(demo2.id, demo2);
-    }
+    // La caja se mantiene vacía para nuevos usuarios.
+    LoggerService.i('Caja de Hive principal abierta: $boxName');
   }
 
   @override

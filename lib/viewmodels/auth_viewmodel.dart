@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../services/auth_service.dart';
+import '../services/api_auth_service.dart';
 import '../services/database_service.dart';
 import '../viewmodels/wishlist_viewmodel.dart';
 import '../core/logger_service.dart';
 
-/// Proveedor para inyectar AuthService
-final authServiceProvider = Provider<AuthService>((ref) {
-  return AuthService();
+/// Proveedor para inyectar ApiAuthService
+final apiAuthServiceProvider = Provider<ApiAuthService>((ref) {
+  return ApiAuthService();
 });
 
 /// Estado de autenticación para representar si hay sesión activa, error o estamos cargando
@@ -20,7 +20,7 @@ class AuthState {
 
 /// ViewModel encargado de gestionar el flujo de usuarios con contraseñas.
 class AuthViewModel extends StateNotifier<AuthState> {
-  final AuthService _authService;
+  final ApiAuthService _authService;
   final Ref _ref;
 
   AuthViewModel(this._authService, this._ref) : super(AuthState(isLoading: true)) {
@@ -45,10 +45,10 @@ class AuthViewModel extends StateNotifier<AuthState> {
   }
 
   /// Inicia sesión con el nombre de usuario y contraseña
-  Future<void> login(String username, String password) async {
+  Future<void> login(String username, String password, {bool rememberMe = false}) async {
     state = AuthState(isLoading: true, currentUser: state.currentUser);
     try {
-      await _authService.login(username, password);
+      await _authService.login(username, password, rememberMe: rememberMe);
       await _initUserDatabase(username);
     } catch (e) {
       state = AuthState(isLoading: false, currentUser: null, error: e.toString());
@@ -63,18 +63,25 @@ class AuthViewModel extends StateNotifier<AuthState> {
     state = AuthState(isLoading: false, currentUser: null);
   }
 
-  /// Prepara la base de datos de Hive para el usuario dado y actualiza la lista de deseos
+  /// Prepara el servicio de datos para el usuario dado y actualiza la lista de deseos mediante la API.
   Future<void> _initUserDatabase(String username) async {
     final dbService = _ref.read(databaseServiceProvider);
+
+    // Inicializamos el servicio (el ApiDatabaseService hace una llamada a la API aquí)
     await dbService.init(username);
-    // Invalidamos el provider de la wishlist para que se recargue con los datos del nuevo box
+
+    // Invalidar el provider fuerza una nueva creación del WishlistViewModel con el servicio actualizado
     _ref.invalidate(wishlistViewModelProvider);
+
+    // Disparamos una recarga desde el servidor para llenar la UI con los datos reales
+    await _ref.read(wishlistViewModelProvider.notifier).refreshFromServer();
+
     state = AuthState(isLoading: false, currentUser: username);
   }
 }
 
 /// Proveedor de Riverpod del AuthViewModel
 final authViewModelProvider = StateNotifierProvider<AuthViewModel, AuthState>((ref) {
-  final authService = ref.watch(authServiceProvider);
+  final authService = ref.watch(apiAuthServiceProvider);
   return AuthViewModel(authService, ref);
 });

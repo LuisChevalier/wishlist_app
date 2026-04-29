@@ -19,6 +19,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isObscured = true;
+  bool _rememberMe = false;
 
   @override
   void initState() {
@@ -39,7 +40,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final password = _passwordController.text;
       
       try {
-        await ref.read(authViewModelProvider.notifier).login(username, password);
+        await ref.read(authViewModelProvider.notifier).login(
+          username, 
+          password, 
+          rememberMe: _rememberMe,
+        );
         soundService.playConfirmSound();
       } catch (e) {
         if (!mounted) return;
@@ -204,6 +209,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     },
                     onFieldSubmitted: (_) => _login(),
                   ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1),
+
+                  const SizedBox(height: 8),
+
+                  // Recordar sesión
+                  CheckboxListTile(
+                    value: _rememberMe,
+                    onChanged: (val) {
+                      setState(() {
+                        _rememberMe = val ?? false;
+                      });
+                    },
+                    title: const Text('Recordar sesión'),
+                    subtitle: const Text('Mantén tu sesión activa al reabrir la app.'),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    activeColor: colorScheme.primary,
+                    contentPadding: EdgeInsets.zero,
+                  ).animate().fadeIn(delay: 550.ms),
 
                   const SizedBox(height: 32),
 

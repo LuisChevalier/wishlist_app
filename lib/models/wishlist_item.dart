@@ -67,4 +67,32 @@ class WishlistItem extends HiveObject {
       createdAt: createdAt,
     );
   }
+
+  factory WishlistItem.fromJson(Map<String, dynamic> json) {
+    return WishlistItem(
+      id: json['id'],
+      name: json['name'],
+      priority: Priority.values[json['priority'] ?? 1],
+      price: (json['price'] ?? 0.0).toDouble(),
+      purchaseLocation: json['purchaseLocation'] ?? '',
+      expectedDate: json['expectedDate'] != null ? DateTime.parse(json['expectedDate']) : DateTime.now(),
+      notes: json['notes'] ?? '',
+      isPurchased: json['isCompleted'] ?? false,
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      if (id.isNotEmpty) 'id': id,
+      'name': name,
+      'priority': priority.index,
+      'price': price,
+      'purchaseLocation': purchaseLocation,
+      'expectedDate': expectedDate.toIso8601String(),
+      'notes': notes,
+      'isPurchased': isPurchased, // Node takes isPurchased or isCompleted
+      'createdAt': createdAt.toIso8601String(),
+    };
+  }
 }

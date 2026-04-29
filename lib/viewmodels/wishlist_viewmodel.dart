@@ -3,9 +3,14 @@ import '../models/wishlist_item.dart';
 import '../models/sort_option.dart';
 import '../models/priority.dart';
 import '../services/database_service.dart';
+import '../services/api_database_service.dart';
+import 'auth_viewmodel.dart';
 
+/// Proveedor de Riverpod que inyecta la implementación de DB basada en API REST.
+/// El ApiDatabaseService usa Dio + SecureStorage en lugar de Hive local.
 final databaseServiceProvider = Provider<DatabaseService>((ref) {
-  throw UnimplementedError('databaseServiceProvider uninitialized');
+  final authService = ref.watch(apiAuthServiceProvider);
+  return ApiDatabaseService(authService);
 });
 
 class WishlistState {
@@ -64,12 +69,24 @@ class WishlistViewModel extends StateNotifier<WishlistState> {
   final DatabaseService _dbService;
 
   WishlistViewModel(this._dbService) : super(WishlistState(items: [])) {
+    // La carga inicial es síncrona desde la caché del servicio.
+    // La primera carga real desde el servidor la dispara auth_viewmodel.dart al hacer init().
     _loadItems();
   }
 
   void _loadItems() {
+    // Leer desde la caché en memoria del ApiDatabaseService
     final items = _dbService.getItems();
     state = state.copyWith(items: items);
+  }
+
+  /// Recarga los ítems desde el servidor y actualiza el estado de la UI.
+  /// Se llama tras el init() del AuthViewModel para obtener los datos reales.
+  Future<void> refreshFromServer() async {
+    if (_dbService is ApiDatabaseService) {
+      await (_dbService as ApiDatabaseService).fetchItemsFromServer();
+    }
+    _loadItems();
   }
 
   Future<void> addItem(WishlistItem item) async {

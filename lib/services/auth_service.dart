@@ -17,7 +17,8 @@ class AuthService {
 
   /// Inicia sesión o registra un nuevo usuario si no existe.
   /// Si la contraseña es incorrecta para un usuario existente, lanza una [Exception].
-  Future<void> login(String username, String password) async {
+  /// [rememberMe] decide si persistimos el usuario para el siguiente arranque de la app.
+  Future<void> login(String username, String password, {bool rememberMe = false}) async {
     final box = Hive.box<String>(_authBoxName);
     
     // Verificamos si el usuario ya existe en nuestro registro
@@ -33,10 +34,14 @@ class AuthService {
       LoggerService.i('Nuevo usuario registrado localmente: $username');
     }
 
-    // Guardar la sesión actual
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_userKey, username);
-    LoggerService.i('Usuario logueado exitosamente: $username');
+    // Guardar la sesión actual SOLO si se selecciona recordar
+    if (rememberMe) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_userKey, username);
+      LoggerService.i('Usuario logueado exitosamente con persistencia: $username');
+    } else {
+      LoggerService.i('Usuario logueado exitosamente sin persistencia: $username');
+    }
   }
 
   /// Borra el usuario activo de las preferencias.
